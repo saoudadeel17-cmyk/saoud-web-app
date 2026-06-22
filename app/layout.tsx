@@ -2,13 +2,27 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "SAQR Persian Heritage Exports",
-  description: "Persian rugs, Arabian mats, and handmade traditional exports.",
+  title: "SAQR Heritage Exports — Persian Rugs & Arabian Crafts",
+  description: "Exporting authentic Persian rugs, Arabian mats, and handmade traditional crafts worldwide from Pakistan.",
+  openGraph: {
+    title: "SAQR Heritage Exports",
+    description: "Persian rugs, Arabian mats, and handmade traditional exports.",
+    type: "website",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Inter:wght@400;500;600&display=swap"
+          rel="stylesheet"
+        />
+      </head>
       <body>{children}</body>
     </html>
   );
