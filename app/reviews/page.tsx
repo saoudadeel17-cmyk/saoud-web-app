@@ -1,35 +1,76 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-
-interface Review {
-  name: string;
-  stars: number;
-  text: string;
-}
+import { useEffect, useState } from "react";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
+import { createClient } from "@/lib/supabase/client";
+import { useUser } from "@/hooks/useUser";
+import Icon from "@/components/ui/Icon";
+import type { Review } from "@/types";
 
 export default function ReviewsPage() {
+  const { user } = useUser();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [form, setForm] = useState({ name: "", stars: 5, text: "" });
   const [error, setError] = useState("");
 
-  function addReview() {
+  useEffect(() => {
+    const supabase = createClient();
+    supabase
+      .from("reviews")
+      .select("*")
+      .eq("product_id", "general")
+      .order("created_at", { ascending: false })
+      .then(({ data }) => {
+        if (data?.length) setReviews(data as Review[]);
+      });
+  }, []);
+
+  async function addReview() {
     setError("");
     if (!form.text.trim() || !form.name.trim()) {
       setError("Please enter your name and review.");
       return;
     }
-    setReviews([{ ...form }, ...reviews]);
+
+    if (user) {
+      const supabase = createClient();
+      const { data, error: insertError } = await supabase
+        .from("reviews")
+        .insert({
+          product_id: "general",
+          user_id: user.id,
+          user_name: form.name,
+          rating: form.stars,
+          body: form.text,
+        })
+        .select()
+        .single();
+
+      if (insertError) {
+        setError(insertError.message);
+        return;
+      }
+      setReviews([data as Review, ...reviews]);
+    } else {
+      setReviews([{
+        id: `local-${Date.now()}`,
+        product_id: "general",
+        user_id: "",
+        user_name: form.name,
+        rating: form.stars,
+        body: form.text,
+        is_verified_purchase: false,
+        created_at: new Date().toISOString(),
+      }, ...reviews]);
+    }
+
     setForm({ name: "", stars: 5, text: "" });
   }
 
   return (
     <main>
-      <nav className="nav">
-        <strong className="brand">Reviews</strong>
-        <div><Link href="/">Home</Link><Link href="/products">Shop</Link></div>
-      </nav>
+      <Navbar />
 
       <section className="section">
         <h1>Customer Reviews</h1>
@@ -48,22 +89,28 @@ export default function ReviewsPage() {
           </select>
           <label>Review</label>
           <textarea className="input-full" value={form.text} rows={4} placeholder="Share your experience with SAQR Heritage Exports..." onChange={(e) => setForm({ ...form, text: e.target.value })} />
-          {error && <p className="form-error">{error}</p>}
+          {error && (
+          <div className="alert alert-error" role="alert">
+            <Icon name="alert" size={16} />
+            <span>{error}</span>
+          </div>
+        )}
           <button className="btn" style={{ marginTop: "14px" }} onClick={addReview}>Submit Review</button>
         </div>
 
         {reviews.length === 0 ? (
           <p style={{ color: "#b8a080" }}>No reviews yet. Be the first to share your experience.</p>
         ) : (
-          reviews.map((r, i) => (
-            <div className="review" key={i}>
-              <div className="review-name">{r.name}</div>
-              <div className="review-stars">{"★".repeat(r.stars)}{"☆".repeat(5 - r.stars)}</div>
-              <div className="review-text">{r.text}</div>
+          reviews.map((r) => (
+            <div className="review" key={r.id}>
+              <div className="review-name">{r.user_name}</div>
+              <div className="review-stars">{"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}</div>
+              <div className="review-text">{r.body}</div>
             </div>
           ))
         )}
       </section>
+      <Footer />
     </main>
   );
 }

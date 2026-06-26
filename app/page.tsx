@@ -1,7 +1,13 @@
 "use client";
+
+import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 import { products, categories } from "./data/products";
+import { formatPKR } from "@/lib/utils";
+import Icon from "@/components/ui/Icon";
 
 function useInView(threshold = 0.15) {
   const ref = useRef<HTMLElement>(null);
@@ -40,19 +46,7 @@ export default function Home() {
 
   return (
     <main>
-      {/* ── Nav ── */}
-      <nav className="nav">
-        <strong className="brand">SAQR Heritage Exports</strong>
-        <div className="nav-links">
-          <Link href="/products">Products</Link>
-          <Link href="/cart">Cart</Link>
-          <Link href="/orders">Orders</Link>
-          <Link href="/contact">Contact</Link>
-          <Link href="/login" className="btn nav-cta">Login</Link>
-        </div>
-      </nav>
-
-      {/* ── Hero ── */}
+      <Navbar />
       <section className="hero">
         <div className="hero-content">
           <p className="eyebrow animate-fadein" style={{ animationDelay: "0.1s" }}>Persian · Arabian · Iranian · UAE · Qatar</p>
@@ -97,14 +91,18 @@ export default function Home() {
       {/* ── Search ── */}
       <div className="search-bar-wrap">
         <div className="search-bar">
-          <span className="search-icon">🔍</span>
+          <span className="search-icon"><Icon name="search" size={16} /></span>
           <input
             type="text"
             placeholder="Search rugs, mats, crafts..."
             value={searchQuery}
             onChange={(e) => { setSearchQuery(e.target.value); setVisibleCount(12); }}
           />
-          {searchQuery && <button className="search-clear" onClick={() => setSearchQuery("")}>✕</button>}
+          {searchQuery && (
+            <button className="search-clear" onClick={() => setSearchQuery("")} type="button" aria-label="Clear search">
+              <Icon name="x" size={14} />
+            </button>
+          )}
         </div>
         <p className="results-count">{filtered.length} items</p>
       </div>
@@ -115,10 +113,11 @@ export default function Home() {
           <article
             className="card"
             key={item.id}
+            data-testid="product-card"
             style={{ animationDelay: `${(i % 12) * 0.05}s` }}
           >
             <div className="imageWrap">
-              <img src={item.image} alt={item.name} loading="lazy" />
+              <Image src={item.image} alt={item.name} fill sizes="(max-width: 700px) 100vw, 270px" style={{ objectFit: "cover" }} />
               <div className="popup">{item.detail}</div>
               <div className="img-overlay" />
             </div>
@@ -132,8 +131,8 @@ export default function Home() {
                 <span className="color-names">{item.colors.join(", ")}</span>
               </div>
               <div className="card-footer">
-                <strong>${item.price.toLocaleString()}</strong>
-                <Link href="/products" className="btn-outline">View Details</Link>
+                <strong>{formatPKR(item.price_pkr)}</strong>
+                <Link href={`/products/${item.slug}`} className="btn-outline">View Details</Link>
               </div>
             </div>
           </article>
@@ -162,13 +161,13 @@ export default function Home() {
         <h2>SAQR Heritage Exports</h2>
         <div className="why-grid">
           {[
-            { icon: "🧵", title: "Handcrafted Quality", desc: "Every piece is hand-woven or hand-made by master artisans using traditional techniques passed down for generations." },
-            { icon: "🌍", title: "Worldwide Export", desc: "We ship to 30+ countries. Trusted by luxury hotels, interior designers, and collectors globally." },
-            { icon: "🎨", title: "Authentic Designs", desc: "Original Persian, Arabian, and Iranian patterns — not factory reproductions. Real cultural heritage in every thread." },
-            { icon: "📦", title: "Wholesale Available", desc: "Bulk pricing for retailers, interior firms, and hospitality projects. Contact us for trade pricing." },
+            { icon: "package" as const, title: "Handcrafted Quality", desc: "Every piece is hand-woven or hand-made by master artisans using traditional techniques passed down for generations." },
+            { icon: "globe" as const, title: "Worldwide Export", desc: "We ship to 30+ countries. Trusted by luxury hotels, interior designers, and collectors globally." },
+            { icon: "tag" as const, title: "Authentic Designs", desc: "Original Persian, Arabian, and Iranian patterns — not factory reproductions. Real cultural heritage in every thread." },
+            { icon: "package" as const, title: "Wholesale Available", desc: "Bulk pricing for retailers, interior firms, and hospitality projects. Contact us for trade pricing." },
           ].map((w) => (
             <div className="why-card" key={w.title}>
-              <span className="why-icon">{w.icon}</span>
+              <span className="why-icon"><Icon name={w.icon} size={28} /></span>
               <h3>{w.title}</h3>
               <p>{w.desc}</p>
             </div>
@@ -176,15 +175,7 @@ export default function Home() {
         </div>
       </AnimatedSection>
 
-      {/* ── Footer ── */}
-      <footer>
-        <span className="brand">SAQR Heritage Exports</span>
-        <div style={{ display: "flex", gap: "24px", flexWrap: "wrap" }}>
-          <a href="https://instagram.com/SAQR-47" target="_blank" rel="noopener noreferrer">📸 Instagram: SAQR-47</a>
-          <a href="https://wa.me/923704842423" target="_blank" rel="noopener noreferrer">💬 WhatsApp: 0370 4842423</a>
-        </div>
-        <span>© {new Date().getFullYear()} SAQR Heritage Exports</span>
-      </footer>
+      <Footer />
     </main>
   );
 }

@@ -2,28 +2,29 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import Navbar from "@/components/layout/Navbar";
+import Icon from "@/components/ui/Icon";
+import { createClient } from "@/lib/supabase/client";
+import { getAuthError } from "@/lib/errors";
 
 export default function SignupPage() {
   const [form, setForm] = useState({
+    name: "",
     email: "",
     password: "",
     confirm: "",
     country: "",
     phone: "",
   });
-
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  function signup() {
+  async function signup() {
     setError("");
 
-    if (
-      !form.email ||
-      !form.password ||
-      !form.country
-    ) {
+    if (!form.name || !form.email || !form.password || !form.country) {
       setError("Please fill in all required fields.");
       return;
     }
@@ -38,15 +39,27 @@ export default function SignupPage() {
       return;
     }
 
-    localStorage.setItem(
-      "user",
-      JSON.stringify({
-        email: form.email,
-        password: form.password,
-        country: form.country,
-        phone: form.phone,
-      })
-    );
+    setLoading(true);
+    const supabase = createClient();
+    const { error: signUpError } = await supabase.auth.signUp({
+      email: form.email,
+      password: form.password,
+      options: {
+        data: {
+          full_name: form.name,
+          phone: form.phone,
+          country: form.country,
+        },
+      },
+    });
+
+    setLoading(false);
+
+    if (signUpError) {
+      const code = signUpError.message.toLowerCase().includes("already") ? "user_already_exists" : signUpError.message;
+      setError(getAuthError(code));
+      return;
+    }
 
     setSuccess(true);
   }
@@ -54,29 +67,16 @@ export default function SignupPage() {
   if (success) {
     return (
       <main>
-        <nav className="nav">
-          <strong className="brand">Sign Up</strong>
-          <div>
-            <Link href="/">Home</Link>
-          </div>
-        </nav>
-
+        <Navbar />
         <div className="formBox">
-          <div className="successBox">
-            <h2>Account Created Successfully!</h2>
-            <p>
-              Your account has been created.
-            </p>
+          <div className="alert alert-success" role="alert">
+            <Icon name="check" size={16} />
+            <div>
+              <h2 style={{ marginBottom: "8px" }}>Check your email to verify</h2>
+              <p>We sent a verification link to {form.email}. Please verify before logging in.</p>
+            </div>
           </div>
-
-          <Link
-            href="/login"
-            className="btn"
-            style={{
-              marginTop: "20px",
-              display: "inline-block",
-            }}
-          >
+          <Link href="/login" className="btn" style={{ marginTop: "20px", display: "inline-block" }}>
             Go To Login
           </Link>
         </div>
@@ -86,45 +86,38 @@ export default function SignupPage() {
 
   return (
     <main>
-      <nav className="nav">
-        <strong className="brand">Sign Up</strong>
-
-        <div>
-          <Link href="/">Home</Link>
-          <Link href="/login">Login</Link>
-        </div>
-      </nav>
+      <Navbar />
 
       <div className="formBox">
         <h1>Create Account</h1>
+
+        <label>Full Name *</label>
+        <input
+          className="input-full"
+          type="text"
+          placeholder="Your full name"
+          onChange={(e) => setForm({ ...form, name: e.target.value })}
+        />
 
         <label>Email *</label>
         <input
           className="input-full"
           type="email"
           placeholder="Your email"
-          onChange={(e) =>
-            setForm({ ...form, email: e.target.value })
-          }
+          onChange={(e) => setForm({ ...form, email: e.target.value })}
         />
 
         <label>Password *</label>
-
         <div style={{ position: "relative" }}>
           <input
             className="input-full"
             type={showPassword ? "text" : "password"}
             placeholder="At least 6 characters"
-            onChange={(e) =>
-              setForm({ ...form, password: e.target.value })
-            }
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
           />
-
           <button
             type="button"
-            onClick={() =>
-              setShowPassword(!showPassword)
-            }
+            onClick={() => setShowPassword(!showPassword)}
             style={{
               position: "absolute",
               right: "10px",
@@ -144,72 +137,47 @@ export default function SignupPage() {
           className="input-full"
           type={showPassword ? "text" : "password"}
           placeholder="Repeat password"
-          onChange={(e) =>
-            setForm({ ...form, confirm: e.target.value })
-          }
+          onChange={(e) => setForm({ ...form, confirm: e.target.value })}
         />
 
         <label>Country *</label>
         <select
           className="input-full"
-          onChange={(e) =>
-            setForm({ ...form, country: e.target.value })
-          }
+          onChange={(e) => setForm({ ...form, country: e.target.value })}
         >
           <option value="">Select Country</option>
           <option value="Pakistan">Pakistan</option>
-          <option value="United Arab Emirates">
-            United Arab Emirates
-          </option>
-          <option value="Saudi Arabia">
-            Saudi Arabia
-          </option>
+          <option value="United Arab Emirates">United Arab Emirates</option>
+          <option value="Saudi Arabia">Saudi Arabia</option>
           <option value="Qatar">Qatar</option>
           <option value="Kuwait">Kuwait</option>
           <option value="Oman">Oman</option>
           <option value="Bahrain">Bahrain</option>
-          <option value="United Kingdom">
-            United Kingdom
-          </option>
-          <option value="United States">
-            United States
-          </option>
+          <option value="United Kingdom">United Kingdom</option>
+          <option value="United States">United States</option>
         </select>
 
         <label>Phone / WhatsApp</label>
         <input
           className="input-full"
           placeholder="Optional"
-          onChange={(e) =>
-            setForm({ ...form, phone: e.target.value })
-          }
+          onChange={(e) => setForm({ ...form, phone: e.target.value })}
         />
 
         {error && (
-          <p className="form-error">{error}</p>
+          <div className="alert alert-error" role="alert">
+            <Icon name="alert" size={16} />
+            <span>{error}</span>
+          </div>
         )}
 
-        <button
-          className="btn"
-          style={{ marginTop: "20px" }}
-          onClick={signup}
-        >
-          Create Account
+        <button className="btn" style={{ marginTop: "20px" }} onClick={signup} disabled={loading}>
+          {loading ? "Creating account..." : "Create Account"}
         </button>
 
-        <p
-          style={{
-            marginTop: "15px",
-            fontSize: "13px",
-          }}
-        >
+        <p style={{ marginTop: "15px", fontSize: "13px" }}>
           Already have an account?{" "}
-          <Link
-            href="/login"
-            style={{ color: "#d9a441" }}
-          >
-            Login here
-          </Link>
+          <Link href="/login" style={{ color: "#d9a441" }}>Login here</Link>
         </p>
       </div>
     </main>

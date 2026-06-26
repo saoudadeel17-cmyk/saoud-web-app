@@ -1,71 +1,82 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import Navbar from "@/components/layout/Navbar";
+import Icon from "@/components/ui/Icon";
+import { createClient } from "@/lib/supabase/client";
+import { getAuthError } from "@/lib/errors";
 
 export default function LoginPage() {
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-  });
-
+  const router = useRouter();
+  const [form, setForm] = useState({ email: "", password: "" });
   const [message, setMessage] = useState("");
+  const [isSuccess, setIsSuccess] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  function login() {
+  async function login() {
     if (!form.email || !form.password) {
       setMessage("Please fill in all fields.");
+      setIsSuccess(false);
       return;
     }
 
-    const savedUser = JSON.parse(localStorage.getItem("user"));
+    setLoading(true);
+    setMessage("");
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithPassword({
+      email: form.email,
+      password: form.password,
+    });
 
-    if (
-      savedUser &&
-      savedUser.email === form.email &&
-      savedUser.password === form.password
-    ) {
-      setMessage("Login successful.");
-    } else {
-      setMessage("Invalid email or password.");
+    if (error) {
+      setMessage(getAuthError(error.message.includes("Invalid") ? "invalid_credentials" : error.message));
+      setIsSuccess(false);
+      setLoading(false);
+      return;
     }
+
+    setMessage("Login successful.");
+    setIsSuccess(true);
+    router.push("/dashboard");
+    router.refresh();
+  }
+
+  async function loginWithGoogle() {
+    const supabase = createClient();
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
+    });
   }
 
   return (
     <main>
-      <nav className="nav">
-        <strong className="brand">Login</strong>
-        <div>
-          <Link href="/">Home</Link>
-          <Link href="/signup">Sign Up</Link>
-        </div>
-      </nav>
+      <Navbar />
 
       <div className="formBox">
         <h1>Customer Login</h1>
 
-        <label>Email</label>
+        <label htmlFor="email">Email</label>
         <input
+          id="email"
           className="input-full"
           type="email"
           placeholder="Your email"
-          onChange={(e) =>
-            setForm({ ...form, email: e.target.value })
-          }
+          onChange={(e) => setForm({ ...form, email: e.target.value })}
         />
 
-        <label>Password</label>
-
+        <label htmlFor="password">Password</label>
         <div style={{ position: "relative" }}>
           <input
+            id="password"
             className="input-full"
             type={showPassword ? "text" : "password"}
             placeholder="Your password"
-            onChange={(e) =>
-              setForm({ ...form, password: e.target.value })
-            }
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
           />
-
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
@@ -77,46 +88,43 @@ export default function LoginPage() {
               border: "none",
               background: "transparent",
               cursor: "pointer",
+              color: "#b8a080",
             }}
+            aria-label={showPassword ? "Hide password" : "Show password"}
           >
-            {showPassword ? "Hide" : "Show"}
+            <Icon name={showPassword ? "eye-off" : "eye"} size={18} />
           </button>
         </div>
 
         {message && (
-          <p
-            className={
-              message.includes("successful")
-                ? "form-success"
-                : "form-error"
-            }
-          >
-            {message}
-          </p>
+          <div className={`alert ${isSuccess ? "alert-success" : "alert-error"}`} role="alert">
+            <Icon name={isSuccess ? "check" : "alert"} size={16} />
+            <span>{message}</span>
+          </div>
         )}
 
-        <button
-          className="btn"
-          style={{ marginTop: "20px" }}
-          onClick={login}
-        >
-          Login
+        <button className="btn" style={{ marginTop: "20px" }} onClick={login} disabled={loading}>
+          {loading ? (
+            <>
+              <span className="spinner" /> Signing in...
+            </>
+          ) : (
+            "Login"
+          )}
         </button>
 
-        <p
-          style={{
-            marginTop: "20px",
-            fontSize: "13px",
-            color: "#b8a080",
-          }}
+        <button
+          className="btn-outline"
+          style={{ marginTop: "12px", width: "100%" }}
+          onClick={loginWithGoogle}
+          type="button"
         >
-          Don't have an account?{" "}
-          <Link
-            href="/signup"
-            style={{ color: "#d9a441" }}
-          >
-            Sign up here
-          </Link>
+          Continue with Google
+        </button>
+
+        <p style={{ marginTop: "20px", fontSize: "13px", color: "#b8a080" }}>
+          Don&apos;t have an account?{" "}
+          <Link href="/signup" style={{ color: "#d9a441" }}>Sign up here</Link>
         </p>
       </div>
     </main>

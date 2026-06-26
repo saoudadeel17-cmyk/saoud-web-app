@@ -1,19 +1,24 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./shadcn.css";
 
 export const metadata: Metadata = {
-  title: "SAQR Heritage Exports — Persian Rugs & Arabian Crafts",
-  description: "Exporting authentic Persian rugs, Arabian mats, and handmade traditional crafts worldwide from Pakistan.",
+  title: 'SAQR Heritage Exports — Authentic Persian & Arabian Rugs',
+  description: 'Handcrafted Persian rugs, Arabian mats, and Iranian collections. Shipped worldwide from Pakistan.',
+  icons: {
+    icon: '/favicon.svg',
+    apple: '/favicon.svg',
+  },
   openGraph: {
-    title: "SAQR Heritage Exports",
-    description: "Persian rugs, Arabian mats, and handmade traditional exports.",
-    type: "website",
+    title: 'SAQR Heritage Exports',
+    description: 'Authentic Persian & Arabian rugs handcrafted with tradition.',
+    type: 'website',
   },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -23,7 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
         />
       </head>
-      <body>{children}</body>
+      <body suppressHydrationWarning>{children}</body>
     </html>
   );
 }

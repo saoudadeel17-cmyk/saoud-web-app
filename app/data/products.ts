@@ -1,16 +1,30 @@
 export interface Product {
   id: number;
   name: string;
+  slug: string;
   category: string;
   price: number;
+  price_pkr: number;
   image: string;
+  images: string[];
   colors: string[];
   detail: string;
+  stock: number;
 }
 
 export type Category = "All" | "Persian Rugs" | "Arabian Mats" | "Iranian Collection" | "Handmade Things";
 
-export const products: Product[] = [
+const USD_TO_PKR = 278;
+
+function slugify(name: string): string {
+  return name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+}
+
+function toPricePKR(usd: number): number {
+  return Math.round((usd * USD_TO_PKR) / 50) * 50;
+}
+
+const rawProducts = [
   // ── Persian Rugs (30) ──
   { id: 1, name: "Royal Persian Silk Rug", category: "Persian Rugs", price: 420, image: "https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=600&q=80", colors: ["Crimson", "Gold", "Navy"], detail: "Hand-knotted Persian silk rug inspired by Iranian palace patterns. Ideal for luxury homes, hotels, and international buyers." },
   { id: 2, name: "Isfahan Medallion Rug", category: "Persian Rugs", price: 580, image: "https://images.unsplash.com/photo-1600166898405-da9535204843?w=600&q=80", colors: ["Ivory", "Rose", "Cobalt"], detail: "Classic Isfahan medallion design with intricate floral borders, hand-woven in fine wool and silk blend." },
@@ -139,6 +153,14 @@ export const products: Product[] = [
   { id: 119, name: "Silk Prayer Beads", category: "Handmade Things", price: 60, image: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600&q=80", colors: ["Amber", "Ivory", "Ebony"], detail: "99-bead tasbih with natural amber, ivory, and ebony beads, silver spacers." },
   { id: 120, name: "Hand-woven Wall Clock", category: "Handmade Things", price: 155, image: "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=600&q=80", colors: ["Walnut", "Brass", "Ivory"], detail: "Kilim-covered wall clock with brass Arabic numeral face, battery-powered movement." },
 ];
+
+export const products: Product[] = rawProducts.map((p) => ({
+  ...p,
+  slug: slugify(p.name),
+  price_pkr: toPricePKR(p.price),
+  images: [p.image],
+  stock: 10,
+}));
 
 export const categories: Category[] = [
   "All",

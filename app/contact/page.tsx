@@ -1,12 +1,11 @@
 import Link from "next/link";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 
 export default function ContactPage() {
   return (
     <main>
-      <nav className="nav">
-        <strong className="brand">Contact</strong>
-        <div><Link href="/">Home</Link><Link href="/products">Shop</Link></div>
-      </nav>
+      <Navbar />
 
       <section className="section">
         <h1>Contact SAQR Heritage Exports</h1>
@@ -33,6 +32,7 @@ export default function ContactPage() {
           </div>
         </div>
       </section>
+      <Footer />
     </main>
   );
 }
