@@ -47,17 +47,6 @@ function LoginForm() {
     router.refresh();
   }
 
-  async function loginWithGoogle() {
-    const supabase = createClient();
-    const next = encodeURIComponent(redirectTo);
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=${next}`,
-      },
-    });
-  }
-
   return (
     <main>
       <Navbar />
@@ -110,7 +99,7 @@ function LoginForm() {
           </div>
         )}
 
-        <button className="btn" style={{ marginTop: "20px" }} onClick={login} disabled={loading}>
+        <button className="btn" onClick={login} disabled={loading}>
           {loading ? (
             <>
               <span className="spinner" /> Signing in...
@@ -118,15 +107,6 @@ function LoginForm() {
           ) : (
             "Login"
           )}
-        </button>
-
-        <button
-          className="btn-outline"
-          style={{ marginTop: "12px", width: "100%" }}
-          onClick={loginWithGoogle}
-          type="button"
-        >
-          Continue with Google
         </button>
 
         <p style={{ marginTop: "20px", fontSize: "13px", color: "#b8a080" }}>

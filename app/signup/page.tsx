@@ -77,8 +77,8 @@ export default function SignupPage() {
               <p>We sent a verification link to {form.email}. Please verify before logging in.</p>
             </div>
           </div>
-          <Link href="/login" className="btn" style={{ marginTop: "20px", display: "inline-block" }}>
-            Go To Login
+          <Link href="/login" className="btn">
+            Login
           </Link>
           </div>
         </div>
@@ -160,10 +160,11 @@ export default function SignupPage() {
           <option value="United States">United States</option>
         </select>
 
-        <label>Phone / WhatsApp</label>
+        <label>Phone Number</label>
         <input
           className="input-full"
-          placeholder="Optional"
+          type="tel"
+          placeholder="03XX XXXXXXX"
           onChange={(e) => setForm({ ...form, phone: e.target.value })}
         />
 
@@ -174,8 +175,8 @@ export default function SignupPage() {
           </div>
         )}
 
-        <button className="btn" style={{ marginTop: "20px" }} onClick={signup} disabled={loading}>
-          {loading ? "Creating account..." : "Create Account"}
+        <button className="btn" onClick={signup} disabled={loading}>
+          {loading ? "Signing up..." : "Sign Up"}
         </button>
 
         <p style={{ marginTop: "15px", fontSize: "13px" }}>
