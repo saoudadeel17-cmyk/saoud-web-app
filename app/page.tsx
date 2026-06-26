@@ -6,7 +6,7 @@ import { useState, useEffect, useRef } from "react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { products, categories } from "./data/products";
-import { formatPKR } from "@/lib/utils";
+import Price from "@/components/Price";
 import Icon from "@/components/ui/Icon";
 
 function useInView(threshold = 0.15) {
@@ -49,18 +49,17 @@ export default function Home() {
       <Navbar />
       <section className="hero">
         <div className="hero-content">
-          <p className="eyebrow animate-fadein" style={{ animationDelay: "0.1s" }}>Persian · Arabian · Iranian · UAE · Qatar</p>
-          <h1 className="animate-fadein" style={{ animationDelay: "0.25s" }}>
+          <h1 className="animate-fadein" style={{ animationDelay: "0.1s" }}>
             Luxury Handmade Rugs,<br />Mats & Traditional Crafts
           </h1>
-          <p className="animate-fadein" style={{ animationDelay: "0.4s" }}>
+          <p className="animate-fadein" style={{ animationDelay: "0.25s" }}>
             Authentic Persian rugs, Arabian mats, and handmade cultural decor — exported worldwide from Pakistan.
           </p>
-          <div className="hero-actions animate-fadein" style={{ animationDelay: "0.55s" }}>
+          <div className="hero-actions animate-fadein" style={{ animationDelay: "0.4s" }}>
             <Link className="btn" href="/products">Explore Collection</Link>
             <Link className="btn-outline" href="/contact">Request Wholesale</Link>
           </div>
-          <div className="hero-stats animate-fadein" style={{ animationDelay: "0.7s" }}>
+          <div className="hero-stats animate-fadein" style={{ animationDelay: "0.55s" }}>
             <div className="stat"><span className="stat-num">120+</span><span className="stat-label">Products</span></div>
             <div className="stat-divider" />
             <div className="stat"><span className="stat-num">4</span><span className="stat-label">Collections</span></div>
@@ -131,7 +130,7 @@ export default function Home() {
                 <span className="color-names">{item.colors.join(", ")}</span>
               </div>
               <div className="card-footer">
-                <strong>{formatPKR(item.price_pkr)}</strong>
+                <strong><Price amountPkr={item.price_pkr} /></strong>
                 <Link href={`/products/${item.slug}`} className="btn-outline">View Details</Link>
               </div>
             </div>
@@ -141,7 +140,7 @@ export default function Home() {
 
       {/* ── Load More ── */}
       {visibleCount < filtered.length && (
-        <div style={{ textAlign: "center", padding: "0 0 60px" }}>
+        <div className="page-container" style={{ textAlign: "center", paddingBottom: "60px" }}>
           <button className="btn" onClick={() => setVisibleCount((v) => v + 12)}>
             Load More ({filtered.length - visibleCount} remaining)
           </button>
@@ -149,7 +148,7 @@ export default function Home() {
       )}
 
       {filtered.length === 0 && (
-        <div className="emptyState">
+        <div className="emptyState page-container">
           <h2>No products found</h2>
           <p>Try a different search or category.</p>
         </div>

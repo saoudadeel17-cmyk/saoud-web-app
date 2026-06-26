@@ -1,7 +1,32 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { fetchUserOrders } from '@/lib/orders/fetchUserOrders'
 import { COD_LIMIT_PKR } from '@/types'
+
+export async function GET() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  let admin
+  try {
+    admin = createAdminClient()
+  } catch {
+    admin = undefined
+  }
+
+  const { orders, error } = await fetchUserOrders(user.id, supabase, admin)
+
+  if (error) {
+    return NextResponse.json({ error }, { status: 500 })
+  }
+
+  return NextResponse.json({ orders })
+}
 
 export async function POST(request: Request) {
   const supabase = await createClient()

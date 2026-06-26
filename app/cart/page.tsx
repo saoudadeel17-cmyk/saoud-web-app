@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { useCartStore } from "@/store/cartStore";
-import { formatPKR } from "@/lib/utils";
+import Price from "@/components/Price";
 
 export default function CartPage() {
   const router = useRouter();
@@ -52,13 +52,15 @@ export default function CartPage() {
                       onChange={(e) => updateQuantity(item.id, Math.max(1, Number(e.target.value)))}
                     />
                   </p>
-                  <strong style={{ color: "#d9a441" }}>{formatPKR(item.price_pkr * item.quantity)}</strong>
+                  <strong style={{ color: "#d9a441" }}>
+                    <Price amountPkr={item.price_pkr * item.quantity} />
+                  </strong>
                 </div>
                 <button className="btn-danger" onClick={() => removeItem(item.id)}>Remove</button>
               </div>
             ))}
 
-            <div className="orderTotal">Total: {formatPKR(total)}</div>
+            <div className="orderTotal">Total: <Price amountPkr={total} /></div>
 
             <button className="btn" style={{ marginTop: "20px" }} onClick={() => router.push("/checkout")}>
               Proceed to Checkout

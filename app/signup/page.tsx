@@ -68,8 +68,9 @@ export default function SignupPage() {
     return (
       <main>
         <Navbar />
-        <div className="formBox">
-          <div className="alert alert-success" role="alert">
+        <div className="page-container page-container--auth page-container--center">
+          <div className="formBox">
+            <div className="alert alert-success" role="alert">
             <Icon name="check" size={16} />
             <div>
               <h2 style={{ marginBottom: "8px" }}>Check your email to verify</h2>
@@ -79,6 +80,7 @@ export default function SignupPage() {
           <Link href="/login" className="btn" style={{ marginTop: "20px", display: "inline-block" }}>
             Go To Login
           </Link>
+          </div>
         </div>
       </main>
     );
@@ -88,7 +90,8 @@ export default function SignupPage() {
     <main>
       <Navbar />
 
-      <div className="formBox">
+      <div className="page-container page-container--auth page-container--center">
+        <div className="formBox">
         <h1>Create Account</h1>
 
         <label>Full Name *</label>
@@ -179,6 +182,7 @@ export default function SignupPage() {
           Already have an account?{" "}
           <Link href="/login" style={{ color: "#d9a441" }}>Login here</Link>
         </p>
+        </div>
       </div>
     </main>
   );

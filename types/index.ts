@@ -13,7 +13,7 @@ export type OrderStatus =
 
 export type PaymentMethod = 'jazzcash' | 'bank_transfer' | 'cod' | 'stripe'
 export type DeliveryMethod = 'standard' | 'express' | 'same_day'
-export type Currency = 'PKR' | 'USD'
+export type Currency = 'PKR' | 'USD' | 'QAR'
 
 export interface Profile {
   id: string

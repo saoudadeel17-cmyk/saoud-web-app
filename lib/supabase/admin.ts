@@ -7,5 +7,10 @@ export function createAdminClient() {
   if (!url || !key) {
     throw new Error('Supabase admin credentials not configured')
   }
-  return createClient(url, key)
+  return createClient(url, key, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  })
 }

@@ -2,7 +2,7 @@ import Link from "next/link";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { createClient } from "@/lib/supabase/server";
-import { formatPKR } from "@/lib/utils";
+import Price from "@/components/Price";
 import type { OrderStatus, PaymentMethod } from "@/types";
 
 export const dynamic = "force-dynamic";
@@ -59,7 +59,7 @@ export default async function OrderSuccessPage({
             <>
               <p>Order ID: <strong>{order.id}</strong></p>
               <p style={{ marginTop: "10px" }}>{paymentMessage(order.payment_method)}</p>
-              <p style={{ marginTop: "10px" }}>Total: <strong>{formatPKR(Number(order.total_pkr))}</strong></p>
+              <p style={{ marginTop: "10px" }}>Total: <strong><Price amountPkr={Number(order.total_pkr)} /></strong></p>
               {order.order_items?.map((item, i) => (
                 <p key={i} style={{ fontSize: "13px", color: "#b8a080" }}>
                   {item.product_name} × {item.quantity}

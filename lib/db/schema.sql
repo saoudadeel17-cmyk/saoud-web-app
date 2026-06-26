@@ -108,6 +108,22 @@ as $$
   );
 $$;
 
+create or replace function public.user_owns_order(order_uuid uuid)
+returns boolean
+language sql
+security definer
+stable
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.orders o
+    where o.id = order_uuid and o.user_id = auth.uid()
+  );
+$$;
+
+grant execute on function public.is_admin() to authenticated, anon, service_role;
+grant execute on function public.user_owns_order(uuid) to authenticated, service_role;
+
 -- Profiles: users can read/update own
 create policy "Users can view own profile" on public.profiles for select using (auth.uid() = id);
 create policy "Users can update own profile" on public.profiles for update using (auth.uid() = id);
@@ -122,13 +138,19 @@ create policy "Users can view own orders" on public.orders for select using (aut
 create policy "Users can create orders" on public.orders for insert with check (auth.uid() = user_id);
 create policy "Admins can manage all orders" on public.orders for all using (public.is_admin());
 
--- Order items: follow parent order
-create policy "Users can view own order items" on public.order_items for select using (
-  exists (select 1 from public.orders where id = order_id and user_id = auth.uid())
-);
-create policy "Users can insert order items" on public.order_items for insert with check (
-  exists (select 1 from public.orders where id = order_id and user_id = auth.uid())
-);
+-- Order items: use security definer helper (no profiles recursion)
+create policy "Users can view own order items" on public.order_items for select using (public.user_owns_order(order_id));
+create policy "Users can insert order items" on public.order_items for insert with check (public.user_owns_order(order_id));
+create policy "Admins can manage all order items" on public.order_items for all using (public.is_admin());
+
+-- Grants
+grant usage on schema public to anon, authenticated, service_role;
+grant select, insert, update, delete on public.profiles to authenticated, service_role;
+grant select, insert, update, delete on public.orders to authenticated, service_role;
+grant select, insert, update, delete on public.order_items to authenticated, service_role;
+grant select on public.products to anon, authenticated, service_role;
+grant select, insert, update, delete on public.reviews to authenticated, service_role;
+grant all on all sequences in schema public to authenticated, service_role;
 
 -- Reviews: public read, authenticated write
 create policy "Anyone can view reviews" on public.reviews for select using (true);

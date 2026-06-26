@@ -1,15 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useState } from "react";
 import Navbar from "@/components/layout/Navbar";
 import Icon from "@/components/ui/Icon";
 import { createClient } from "@/lib/supabase/client";
 import { getAuthError } from "@/lib/errors";
+import { getSafeRedirectPath } from "@/lib/auth/redirect";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = getSafeRedirectPath(searchParams.get("redirect"));
   const [form, setForm] = useState({ email: "", password: "" });
   const [message, setMessage] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
@@ -40,15 +43,18 @@ export default function LoginPage() {
 
     setMessage("Login successful.");
     setIsSuccess(true);
-    router.push("/dashboard");
+    router.push(redirectTo);
     router.refresh();
   }
 
   async function loginWithGoogle() {
     const supabase = createClient();
+    const next = encodeURIComponent(redirectTo);
     await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback?next=${next}`,
+      },
     });
   }
 
@@ -56,7 +62,8 @@ export default function LoginPage() {
     <main>
       <Navbar />
 
-      <div className="formBox">
+      <div className="page-container page-container--auth page-container--center">
+        <div className="formBox">
         <h1>Customer Login</h1>
 
         <label htmlFor="email">Email</label>
@@ -126,7 +133,26 @@ export default function LoginPage() {
           Don&apos;t have an account?{" "}
           <Link href="/signup" style={{ color: "#d9a441" }}>Sign up here</Link>
         </p>
+        </div>
       </div>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <main>
+        <Navbar />
+        <div className="page-container page-container--auth page-container--center">
+          <div className="formBox">
+            <h1>Customer Login</h1>
+            <p style={{ color: "#b8a080" }}>Loading...</p>
+          </div>
+        </div>
+      </main>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }

@@ -1,55 +1,114 @@
-"use client";
+'use client'
 
-import { useEffect, useState } from "react";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
-import { createClient } from "@/lib/supabase/client";
-import { useUser } from "@/hooks/useUser";
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
+import { useUser, PROFILE_UPDATED_EVENT } from '@/hooks/useUser'
+import Icon from '@/components/ui/Icon'
 
 export default function DashboardProfilePage() {
-  const { user } = useUser();
-  const [form, setForm] = useState({ full_name: "", phone: "" });
-  const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false);
+  const router = useRouter()
+  const { user, loading: userLoading } = useUser()
+  const [form, setForm] = useState({ full_name: '', phone: '' })
+  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     if (user) {
-      setForm({ full_name: user.full_name ?? "", phone: user.phone ?? "" });
+      setForm({ full_name: user.full_name ?? '', phone: user.phone ?? '' })
     }
-  }, [user]);
+  }, [user])
 
   async function save() {
-    if (!user) return;
-    setLoading(true);
-    const supabase = createClient();
+    if (!user) return
+    setSaving(true)
+    setFeedback(null)
+    const supabase = createClient()
     const { error } = await supabase
-      .from("profiles")
+      .from('profiles')
       .update({ full_name: form.full_name, phone: form.phone })
-      .eq("id", user.id);
+      .eq('id', user.id)
 
-    setLoading(false);
-    setMessage(error ? error.message : "Profile updated successfully.");
+    setSaving(false)
+    if (error) {
+      setFeedback({ type: 'error', text: error.message })
+      return
+    }
+    setFeedback({ type: 'success', text: 'Profile updated successfully' })
+    window.dispatchEvent(new Event(PROFILE_UPDATED_EVENT))
+    router.refresh()
+  }
+
+  if (userLoading) {
+    return (
+      <div className="dashboard-content">
+        <div className="skeleton" style={{ height: 36, width: 160, marginBottom: 24 }} />
+        <div className="skeleton" style={{ height: 320, borderRadius: 12 }} />
+      </div>
+    )
   }
 
   return (
-    <main>
-      <Navbar />
-      <section className="section">
-        <div className="formBox" style={{ margin: "0", maxWidth: "480px" }}>
-          <h1>Profile</h1>
-          <label>Full Name</label>
-          <input className="input-full" value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} />
-          <label>Phone</label>
-          <input className="input-full" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-          <label>Email (read-only)</label>
-          <input className="input-full" value={user?.email ?? ""} disabled />
-          {message && <p className={message.includes("success") ? "form-success" : "form-error"}>{message}</p>}
-          <button className="btn" style={{ marginTop: "20px" }} onClick={save} disabled={loading}>
-            {loading ? "Saving..." : "Save Changes"}
-          </button>
+    <div className="dashboard-content">
+      <header className="dashboard-page-header">
+        <h1>My Profile</h1>
+        <p className="dashboard-page-subtitle">Manage your personal information</p>
+      </header>
+
+      <div className="dashboard-profile-form dashboard-profile-form--full">
+        <div className="dashboard-field-group">
+          <label htmlFor="profile-name">Full Name</label>
+          <input
+            id="profile-name"
+            className="input-full"
+            value={form.full_name}
+            onChange={(e) => setForm({ ...form, full_name: e.target.value })}
+          />
         </div>
-      </section>
-      <Footer />
-    </main>
-  );
+
+        <div className="dashboard-field-group">
+          <label htmlFor="profile-phone">Phone Number</label>
+          <input
+            id="profile-phone"
+            className="input-full"
+            type="tel"
+            placeholder="03XX XXXXXXX"
+            value={form.phone}
+            onChange={(e) => setForm({ ...form, phone: e.target.value })}
+          />
+          <p className="dashboard-field-hint">Pakistan format: 03XX XXXXXXX</p>
+        </div>
+
+        <div className="dashboard-field-group">
+          <label htmlFor="profile-email">Email</label>
+          <div className="dashboard-readonly-field">
+            <Icon name="lock" size={16} />
+            <input
+              id="profile-email"
+              className="input-full"
+              value={user?.email ?? ''}
+              readOnly
+              disabled
+              title="Email cannot be changed here"
+            />
+          </div>
+          <p className="dashboard-field-hint">Email cannot be changed here</p>
+        </div>
+
+        {feedback && (
+          <div
+            className={`alert ${feedback.type === 'success' ? 'alert-success' : 'alert-error'}`}
+            role="alert"
+          >
+            <Icon name={feedback.type === 'success' ? 'check' : 'alert'} size={16} />
+            <span>{feedback.text}</span>
+          </div>
+        )}
+
+        <button type="button" className="btn dashboard-save-btn" onClick={save} disabled={saving}>
+          {saving ? 'Saving...' : 'Save Changes'}
+        </button>
+      </div>
+    </div>
+  )
 }

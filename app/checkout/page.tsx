@@ -6,7 +6,8 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { useCartStore } from "@/store/cartStore";
 import { createOrder } from "@/lib/actions/orders";
-import { formatPKR, PAKISTAN_PHONE_REGEX } from "@/lib/utils";
+import { PAKISTAN_PHONE_REGEX } from "@/lib/utils";
+import { useFormatPrice } from "@/hooks/useFormatPrice";
 import { getOrderError } from "@/lib/errors";
 import Icon from "@/components/ui/Icon";
 import {
@@ -22,6 +23,7 @@ const STEPS = ["Shipping", "Delivery", "Payment", "Review"];
 
 export default function CheckoutPage() {
   const router = useRouter();
+  const formatPrice = useFormatPrice();
   const items = useCartStore((s) => s.items);
   const clearCart = useCartStore((s) => s.clearCart);
   const [step, setStep] = useState(0);
@@ -207,7 +209,7 @@ export default function CheckoutPage() {
                   onChange={() => setDeliveryMethod(key)}
                   style={{ marginRight: "10px" }}
                 />
-                {label} — {key === "standard" && subtotal >= FREE_SHIPPING_THRESHOLD_PKR ? "FREE" : formatPKR(fee)}
+                {label} — {key === "standard" && subtotal >= FREE_SHIPPING_THRESHOLD_PKR ? "FREE" : formatPrice(fee)}
                 {note && <span style={{ color: "#b8a080", fontSize: "12px" }}> ({note})</span>}
               </label>
             ))}
@@ -280,12 +282,12 @@ export default function CheckoutPage() {
             {items.map((item) => (
               <div key={item.id} style={{ display: "flex", justifyContent: "space-between", padding: "10px 0", borderBottom: "1px solid #3b2a18" }}>
                 <span>{item.name} × {item.quantity}</span>
-                <strong style={{ color: "#d9a441" }}>{formatPKR(item.price_pkr * item.quantity)}</strong>
+                <strong style={{ color: "#d9a441" }}>{formatPrice(item.price_pkr * item.quantity)}</strong>
               </div>
             ))}
-            <p style={{ marginTop: "12px" }}>Subtotal: {formatPKR(subtotal)}</p>
-            <p>Delivery: {formatPKR(deliveryFee)}</p>
-            <p style={{ fontSize: "18px", color: "#d9a441", marginTop: "8px" }}>Total: {formatPKR(total)}</p>
+            <p style={{ marginTop: "12px" }}>Subtotal: {formatPrice(subtotal)}</p>
+            <p>Delivery: {formatPrice(deliveryFee)}</p>
+            <p style={{ fontSize: "18px", color: "#d9a441", marginTop: "8px" }}>Total: {formatPrice(total)}</p>
             <div className="orderBox" style={{ marginTop: "16px" }}>
               <p><b>Ship to:</b> {shipping.full_name}, {shipping.phone}</p>
               <p>{shipping.address}, {shipping.city}</p>

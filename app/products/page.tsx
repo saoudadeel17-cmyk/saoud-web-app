@@ -8,7 +8,7 @@ import Footer from "@/components/layout/Footer";
 import { products, categories, type Product } from "../data/products";
 import { useCartStore } from "@/store/cartStore";
 import Icon from "@/components/ui/Icon";
-import { formatPKR } from "@/lib/utils";
+import Price from "@/components/Price";
 
 interface ProductCardProps {
   product: Product;
@@ -27,39 +27,52 @@ function ProductCard({ product, onAddToCart }: ProductCardProps) {
   }
 
   return (
-    <article className="card" data-testid="product-card">
+    <article className="card product-card" data-testid="product-card">
       <div className="imageWrap">
         <Image src={product.image} alt={product.name} fill sizes="(max-width: 700px) 100vw, 270px" style={{ objectFit: "cover" }} />
         <div className="popup">{product.detail}</div>
       </div>
       <div className="card-body">
         <span className="badge">{product.category}</span>
-        <h3>{product.name}</h3>
-        <strong style={{ color: "#d9a441" }}>{formatPKR(product.price_pkr)}</strong>
+        <h3 className="card-title">{product.name}</h3>
+        <strong style={{ color: "#d9a441" }}><Price amountPkr={product.price_pkr} /></strong>
 
-        <label>Color</label>
-        <select className="input-full" value={color} onChange={(e) => setColor(e.target.value)}>
-          {product.colors.map((c) => <option key={c}>{c}</option>)}
-        </select>
-
-        <label>Quantity</label>
-        <input
-          className="input-small"
-          type="number"
-          min="1"
-          value={qty}
-          onChange={(e) => setQty(Math.max(1, Number(e.target.value)))}
-        />
-
-        <div style={{ display: "flex", gap: "10px", marginTop: "6px", flexWrap: "wrap" }}>
-          <Link href={`/products/${product.slug}`} className="btn-outline">View Details</Link>
-          <button className="btn" onClick={handleAddToCart} data-testid="add-to-cart">Add to Cart</button>
+        <div className="card-options-row">
+          <div className="card-option-field card-option-field--color">
+            <label htmlFor={`color-${product.id}`}>Color</label>
+            <select
+              id={`color-${product.id}`}
+              className="input-full"
+              value={color}
+              onChange={(e) => setColor(e.target.value)}
+            >
+              {product.colors.map((c) => <option key={c}>{c}</option>)}
+            </select>
+          </div>
+          <div className="card-option-field card-option-field--qty">
+            <label htmlFor={`qty-${product.id}`}>Quantity</label>
+            <input
+              id={`qty-${product.id}`}
+              className="input-full"
+              type="number"
+              min="1"
+              value={qty}
+              onChange={(e) => setQty(Math.max(1, Number(e.target.value)))}
+            />
+          </div>
         </div>
-        {cartMsg && (
-        <span className="alert alert-success" style={{ marginTop: "8px", padding: "8px 12px" }}>
-          <Icon name="check" size={14} /> {cartMsg}
-        </span>
-      )}
+
+        <div className="card-actions">
+          <div className="card-actions-row">
+            <Link href={`/products/${product.slug}`} className="btn-outline card-action-btn">View Details</Link>
+            <button className="btn card-action-btn" onClick={handleAddToCart} data-testid="add-to-cart">Add to Cart</button>
+          </div>
+          {cartMsg && (
+            <span className="alert alert-success" style={{ marginTop: "8px", padding: "8px 12px" }}>
+              <Icon name="check" size={14} /> {cartMsg}
+            </span>
+          )}
+        </div>
       </div>
     </article>
   );
@@ -103,7 +116,7 @@ export default function ProductsPage() {
         </div>
       </section>
 
-      <section className="grid">
+      <section className="grid products-grid">
         {filtered.map((product) => (
           <ProductCard key={product.id} product={product} onAddToCart={addToCart} />
         ))}

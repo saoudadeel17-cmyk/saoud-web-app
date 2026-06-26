@@ -4,9 +4,9 @@ import { notFound } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { products } from "@/app/data/products";
-import { formatPKR } from "@/lib/utils";
 import ProductActions from "./ProductActions";
 import ProductReviews from "./ProductReviews";
+import ProductPrice from "./ProductPrice";
 
 export default async function ProductPage({
   params,
@@ -45,12 +45,7 @@ export default async function ProductPage({
           <div>
             <span className="badge">{product.category}</span>
             <h1 style={{ margin: "12px 0" }}>{product.name}</h1>
-            <p style={{ fontSize: "24px", color: "#d9a441", fontFamily: "Cinzel, serif" }}>
-              {formatPKR(product.price_pkr)}
-            </p>
-            <p style={{ fontSize: "13px", color: "#b8a080", marginBottom: "12px" }}>
-              USD ${product.price.toLocaleString()}
-            </p>
+            <ProductPrice product={product} />
             <span style={{ color: stockColor, fontSize: "13px", fontWeight: 600 }}>{stockLabel}</span>
             <p style={{ margin: "16px 0", color: "#b8a080" }}>{product.detail}</p>
             <ProductActions product={product} />

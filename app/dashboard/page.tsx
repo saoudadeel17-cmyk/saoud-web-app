@@ -1,60 +1,132 @@
-import Link from "next/link";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
-import { createClient } from "@/lib/supabase/server";
-import { formatPKR } from "@/lib/utils";
-import { ORDER_STATUS_LABELS, type OrderStatus } from "@/types";
+import Link from 'next/link'
+import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { fetchUserOrders, type UserOrderRow } from '@/lib/orders/fetchUserOrders'
+import Icon from '@/components/ui/Icon'
+import Price from '@/components/Price'
+import {
+  formatMemberSince,
+  formatOrderDate,
+  shortOrderId,
+  statusBadgeClass,
+  statusLabel,
+} from '@/lib/dashboard/helpers'
+import { formatPKR } from '@/lib/currency'
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic'
 
 export default async function DashboardPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const supabase = await createClient()
+  const { data: { user: authUser } } = await supabase.auth.getUser()
 
   const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user!.id)
-    .single();
+    .from('profiles')
+    .select('*')
+    .eq('id', authUser!.id)
+    .single()
 
-  const { data: orders } = await supabase
-    .from("orders")
-    .select("*, order_items(count)")
-    .eq("user_id", user!.id)
-    .order("created_at", { ascending: false });
+  let admin
+  try {
+    admin = createAdminClient()
+  } catch {
+    admin = undefined
+  }
+
+  const { orders: orderList } = await fetchUserOrders(authUser!.id, supabase, admin)
+
+  const recentOrders: UserOrderRow[] = orderList.slice(0, 5)
+
+  const totalOrders = orderList.length
+  const totalSpent = orderList.reduce((sum, o) => sum + Number(o.total_pkr), 0)
+  const memberSinceSource = profile?.created_at ?? authUser?.created_at
+  const memberSince = memberSinceSource ? formatMemberSince(memberSinceSource) : '—'
+
+  const meta = authUser?.user_metadata as Record<string, unknown> | undefined
+  const firstName =
+    profile?.full_name?.trim().split(/\s+/)[0] ||
+    (typeof meta?.full_name === 'string' ? meta.full_name.split(/\s+/)[0] : null) ||
+    authUser?.email?.split('@')[0] ||
+    'there'
 
   return (
-    <main>
-      <Navbar />
-      <section className="section">
-        <h1>Welcome, {profile?.full_name ?? "Customer"}</h1>
-        <p style={{ color: "#b8a080", marginBottom: "24px" }}>{user?.email}</p>
+    <div className="dashboard-content">
+      <header className="dashboard-page-header">
+        <h1>Overview</h1>
+        <p className="dashboard-page-subtitle">Welcome back, {firstName}</p>
+      </header>
 
-        <div style={{ display: "flex", gap: "14px", marginBottom: "32px", flexWrap: "wrap" }}>
-          <Link href="/dashboard/profile" className="btn-outline">Edit Profile</Link>
-          <Link href="/dashboard/order" className="btn-outline">My Orders</Link>
-          <Link href="/dashboard/settings" className="btn-outline">Settings</Link>
+      <div className="dashboard-stats-row">
+        <div className="stat-card">
+          <Icon name="package" size={22} className="stat-card-icon" />
+          <span className="stat-card-value">{totalOrders}</span>
+          <span className="stat-card-label">Total Orders</span>
+        </div>
+        <div className="stat-card">
+          <Icon name="receipt" size={22} className="stat-card-icon" />
+          <span className="stat-card-value">{formatPKR(totalSpent)}</span>
+          <span className="stat-card-label">Total Spent</span>
+        </div>
+        <div className="stat-card">
+          <Icon name="calendar" size={22} className="stat-card-icon" />
+          <span className="stat-card-value stat-card-value--sm">{memberSince}</span>
+          <span className="stat-card-label">Member Since</span>
+        </div>
+      </div>
+
+      <section className="dashboard-section">
+        <div className="dashboard-section-header">
+          <h2>Recent Orders</h2>
         </div>
 
-        <h2 style={{ marginBottom: "16px" }}>Order History</h2>
-        {!orders?.length ? (
-          <div className="emptyState">
-            <h2>No orders yet</h2>
-            <Link href="/products" className="btn" style={{ marginTop: "16px", display: "inline-block" }}>Browse Products</Link>
+        {!recentOrders.length ? (
+          <div className="dashboard-empty">
+            <Icon name="package" size={40} />
+            <h3>No orders yet</h3>
+            <p>Start exploring our handcrafted collection.</p>
+            <Link href="/products" className="btn">Browse Products</Link>
           </div>
         ) : (
-          orders.map((order) => (
-            <div className="orderBox" key={order.id}>
-              <p><b>Order:</b> {order.id.slice(0, 8).toUpperCase()}</p>
-              <p><b>Date:</b> {new Date(order.created_at).toLocaleDateString()}</p>
-              <p><b>Status:</b> {ORDER_STATUS_LABELS[order.status as OrderStatus] ?? order.status}</p>
-              <p><b>Total:</b> {formatPKR(Number(order.total_pkr))}</p>
-              <Link href="/dashboard/order" style={{ color: "#d9a441", fontSize: "13px" }}>View details →</Link>
+          <>
+            <div className="dashboard-table-wrap">
+              <table className="dashboard-table">
+                <thead>
+                  <tr>
+                    <th>Order ID</th>
+                    <th>Date</th>
+                    <th>Items</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentOrders.map((order) => {
+                    const items = order.order_items ?? []
+                    const itemCount = items?.reduce((s, i) => s + i.quantity, 0) ?? 0
+                    const status = order.status
+                    return (
+                      <tr key={order.id}>
+                        <td className="dashboard-table-mono">{shortOrderId(order.id)}</td>
+                        <td>{formatOrderDate(order.created_at)}</td>
+                        <td>{itemCount}</td>
+                        <td><Price amountPkr={Number(order.total_pkr)} /></td>
+                        <td>
+                          <span className={statusBadgeClass(status)}>
+                            {statusLabel(status)}
+                          </span>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
             </div>
-          ))
+            <Link href="/dashboard/order" className="dashboard-view-all">
+              View All Orders
+              <Icon name="arrow-right" size={16} />
+            </Link>
+          </>
         )}
       </section>
-      <Footer />
-    </main>
-  );
+    </div>
+  )
 }

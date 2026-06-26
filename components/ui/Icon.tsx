@@ -11,7 +11,7 @@ export type IconName =
   | 'jazzcash' | 'bank' | 'cod' | 'card'
   | 'heart' | 'heart-filled' | 'share' | 'external-link'
   | 'menu' | 'close' | 'home' | 'tag' | 'receipt'
-  | 'shield' | 'globe' | 'refresh' | 'spinner'
+  | 'shield' | 'globe' | 'refresh' | 'spinner' | 'lock' | 'currency'
 
 interface IconProps {
   name: IconName
@@ -72,6 +72,8 @@ const paths: Record<IconName, ReactNode> = {
   globe: <><circle cx="12" cy="12" r="10" /><line x1="2" y1="12" x2="22" y2="12" /><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" /></>,
   refresh: <><polyline points="23 4 23 10 17 10" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></>,
   spinner: <><line x1="12" y1="2" x2="12" y2="6" /><line x1="12" y1="18" x2="12" y2="22" /><line x1="4.93" y1="4.93" x2="7.76" y2="7.76" /><line x1="16.24" y1="16.24" x2="19.07" y2="19.07" /><line x1="2" y1="12" x2="6" y2="12" /><line x1="18" y1="12" x2="22" y2="12" /><line x1="4.93" y1="19.07" x2="7.76" y2="16.24" /><line x1="16.24" y1="7.76" x2="19.07" y2="4.93" /></>,
+  lock: <><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></>,
+  currency: <><circle cx="12" cy="12" r="10" /><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 0 1 0 4H8" /><path d="M12 6v2M12 16v2" /></>,
 }
 
 export default function Icon({ name, size = 18, className = '', strokeWidth = 1.75 }: IconProps) {

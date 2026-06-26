@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { getSafeRedirectPath } from '@/lib/auth/redirect'
 import { getSupabaseAnonKey, getSupabaseUrl } from '@/lib/supabase/env'
 
 export async function middleware(request: NextRequest) {
@@ -26,6 +27,13 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
   const pathname = request.nextUrl.pathname
+
+  if (user && (pathname === '/login' || pathname === '/signup')) {
+    const url = request.nextUrl.clone()
+    url.pathname = getSafeRedirectPath(url.searchParams.get('redirect'))
+    url.search = ''
+    return NextResponse.redirect(url)
+  }
 
   const isProtected =
     pathname.startsWith('/dashboard') ||
@@ -61,5 +69,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/admin/:path*', '/checkout'],
+  matcher: ['/dashboard/:path*', '/admin/:path*', '/checkout', '/login', '/signup'],
 }
