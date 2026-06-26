@@ -1,18 +1,45 @@
 import type { Metadata } from "next";
+import { siteConfig } from "@/lib/site";
 import "./globals.css";
 import "./shadcn.css";
 
 export const metadata: Metadata = {
-  title: 'SAQR Heritage Exports — Authentic Persian & Arabian Rugs',
-  description: 'Handcrafted Persian rugs, Arabian mats, and Iranian collections. Shipped worldwide from Pakistan.',
+  metadataBase: new URL(siteConfig.url),
+  title: {
+    default: siteConfig.title,
+    template: `%s | ${siteConfig.name}`,
+  },
+  description: siteConfig.description,
+  applicationName: siteConfig.name,
+  keywords: [
+    "Persian rugs",
+    "Arabian mats",
+    "handmade rugs",
+    "traditional crafts",
+    "Pakistan exports",
+    "SAQR Heritage",
+    "wholesale rugs",
+  ],
+  authors: [{ name: siteConfig.name }],
+  creator: siteConfig.name,
+  manifest: "/site.webmanifest",
   icons: {
-    icon: '/favicon.svg',
-    apple: '/favicon.svg',
+    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+    shortcut: "/icon.svg",
+    apple: [{ url: "/apple-icon", sizes: "180x180", type: "image/png" }],
   },
   openGraph: {
-    title: 'SAQR Heritage Exports',
-    description: 'Authentic Persian & Arabian rugs handcrafted with tradition.',
-    type: 'website',
+    title: siteConfig.name,
+    description: siteConfig.description,
+    url: siteConfig.url,
+    siteName: siteConfig.name,
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: siteConfig.name,
+    description: siteConfig.description,
   },
 };
 
