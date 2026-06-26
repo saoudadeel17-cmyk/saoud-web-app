@@ -129,19 +129,40 @@ export default function SignupPage() {
               border: "none",
               background: "transparent",
               cursor: "pointer",
+              color: "#b8a080",
             }}
+            aria-label={showPassword ? "Hide password" : "Show password"}
           >
-            {showPassword ? "Hide" : "Show"}
+            <Icon name={showPassword ? "eye-off" : "eye"} size={18} />
           </button>
         </div>
 
         <label>Confirm Password *</label>
-        <input
-          className="input-full"
-          type={showPassword ? "text" : "password"}
-          placeholder="Repeat password"
-          onChange={(e) => setForm({ ...form, confirm: e.target.value })}
-        />
+        <div style={{ position: "relative" }}>
+          <input
+            className="input-full"
+            type={showPassword ? "text" : "password"}
+            placeholder="Repeat password"
+            onChange={(e) => setForm({ ...form, confirm: e.target.value })}
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            style={{
+              position: "absolute",
+              right: "10px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              border: "none",
+              background: "transparent",
+              cursor: "pointer",
+              color: "#b8a080",
+            }}
+            aria-label={showPassword ? "Hide password" : "Show password"}
+          >
+            <Icon name={showPassword ? "eye-off" : "eye"} size={18} />
+          </button>
+        </div>
 
         <label>Country *</label>
         <select

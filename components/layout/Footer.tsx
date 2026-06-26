@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { siteConfig } from '@/lib/site'
 export default function Footer() {
   const year = new Date().getFullYear()
 
@@ -36,7 +37,7 @@ export default function Footer() {
 
           <div className="footer-col footer-col--contact">
             <h4>Get in Touch</h4>
-            <a href="https://wa.me/923704842423" target="_blank" rel="noopener noreferrer" className="footer-contact-link">
+            <a href={siteConfig.whatsapp.href} target="_blank" rel="noopener noreferrer" className="footer-contact-link">
               WhatsApp
             </a>
           </div>

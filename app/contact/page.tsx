@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import Icon from '@/components/ui/Icon'
+import { siteConfig } from '@/lib/site'
 
 const initialForm = {
   name: '',
@@ -68,15 +69,15 @@ export default function ContactPage() {
                   <Icon name="mail" size={16} />
                   Email
                 </h3>
-                <a href="mailto:saoudadeel17@gmail.com">saoudadeel17@gmail.com</a>
+                <a href={`mailto:${siteConfig.email}`}>{siteConfig.email}</a>
               </div>
               <div className="contactCard">
                 <h3>
                   <Icon name="phone" size={16} />
                   WhatsApp
                 </h3>
-                <a href="https://wa.me/923704842423" target="_blank" rel="noopener noreferrer">
-                  0370 4842423
+                <a href={siteConfig.whatsapp.href} target="_blank" rel="noopener noreferrer">
+                  {siteConfig.whatsapp.display}
                 </a>
               </div>
               <div className="contactCard">

@@ -1,36 +1,75 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SAQR Heritage Exports
+
+Luxury e-commerce storefront for handcrafted Persian rugs, Arabian mats, and traditional crafts — exported worldwide from Pakistan.
+
+Built with **Next.js 16** (App Router), **Supabase** (auth + database), **Stripe**, and **Resend**.
+
+## Features
+
+- Product catalog with categories, search, and multi-currency pricing
+- Supabase authentication (signup, login, email verification)
+- Shopping cart and checkout (JazzCash, bank transfer, COD, Stripe)
+- Customer dashboard (orders, profile, settings)
+- Admin dashboard (orders, products, users)
+- Contact form with email notifications via Resend
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 20+
+- A [Supabase](https://supabase.com) project
+- (Optional) [Resend](https://resend.com) API key for emails
+- (Optional) [Stripe](https://stripe.com) keys for card payments
+
+### Install & run
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Environment variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Create `.env.local` in the project root:
 
-## Learn More
+```env
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
 
-To learn more about Next.js, take a look at the following resources:
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+RESEND_API_KEY=
+RESEND_FROM_EMAIL=
+CONTACT_EMAIL=
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+STRIPE_SECRET_KEY=
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
+STRIPE_WEBHOOK_SECRET=
+```
 
-## Deploy on Vercel
+Run the database schema from `lib/db/schema.sql` in the Supabase SQL Editor. If orders fail with RLS errors, apply `lib/db/fix-all-rls.sql` (or `npm run db:fix-rls` with `DATABASE_URL` set).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Scripts
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server |
+| `npm run build` | Production build |
+| `npm run start` | Start production server |
+| `npm run lint` | Run Biome linter |
+| `npm run db:fix-rls` | Apply RLS fix script to Supabase |
+
+## Contact
+
+- **Email:** [saoudadeel17@gmail.com](mailto:saoudadeel17@gmail.com)
+- **WhatsApp:** [+92 311 4101497](https://wa.me/923114101497)
+- **Hours:** Mon – Sat, 9am – 8pm PKT
+- **Location:** Pakistan · Exporting Worldwide
+
+## Deploy
+
+Deploy to [Vercel](https://vercel.com) and add the environment variables above. Set `NEXT_PUBLIC_APP_URL` to your production domain.
